@@ -7,7 +7,7 @@ export default function Footer() {
            <footer className="footer">
             <div className="footer-content">
               <div className="footer-logo">
-                <Image src="/assets/images/logo.png" alt="Typegrow" width={50} height={50} />
+                <Image src="/assets/Images/logo.jpg" alt="Typegrow" width={50} height={50} />
               </div>
               <div className="footer-links">
                 <div className="footer-column">

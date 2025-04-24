@@ -43,9 +43,6 @@ export async function POST(request) {
                     date,
                     user_id: verified?.data.linkedinId,
                     is_schedule: 1,
-                    upload_id: imageUpload?.url ?? null,
-                    image_id: imageUpload?.data ?? null,
-                    is_file: imageUpload?.data ?? 1
                 },
             });
             slotId = slot.id;

@@ -7,7 +7,7 @@ export default function Header({ session }) {
         <>
             <header className="header">
                 <div className="logo">
-                    <Image src="/assets/images/logo.png" alt="Typegrow" width={40} height={40} />
+                    <Image src="/assets/Images/logo.jpg" alt="Typegrow" width={40} height={40} />
                 </div>
                 <div className="header-right">
                     <Link href="/free-tools" >Free Tools</Link>

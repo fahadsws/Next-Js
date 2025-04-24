@@ -47,6 +47,7 @@ export async function POST(request) {
                 { role: 'user', content: inputText },
             ],
             temperature: 0.7,
+            max_tokens: type === 'longer' ? 800 : 300,
         });
 
         return NextResponse.json({

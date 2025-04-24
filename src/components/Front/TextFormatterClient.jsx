@@ -33,6 +33,7 @@ export default function TextFormatterClient({ slot }) {
   const [loading, setLoading] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
   const [image, setImage] = useState(null);
+  const [postLoading, setPostLoading] = useState(null);
 
 
   const convertHtmlToText = (html) => {
@@ -97,7 +98,7 @@ export default function TextFormatterClient({ slot }) {
       toast.error('Post is empty!');
       return;
     }
-    console.log(image)
+    setPostLoading('post');
     const payload = {
       content: data,
       image: image ?? null
@@ -108,6 +109,7 @@ export default function TextFormatterClient({ slot }) {
         editor.commands.setContent(newContent);
         setImage(null);
         setOpenModel(false);
+        setPostLoading(null);
         toast.success(response?.message);
       })
       .catch((err) => {
@@ -123,6 +125,8 @@ export default function TextFormatterClient({ slot }) {
       toast.error('Post is empty!');
       return;
     }
+    setPostLoading('slot');
+
     const payload = {
       content: data,
       is_slot: slot[0]?.id,
@@ -135,6 +139,7 @@ export default function TextFormatterClient({ slot }) {
         editor.commands.setContent(newContent);
         setOpenModel(false);
         setImage(null);
+        setPostLoading(null);
         toast.success(response?.message);
       })
       .catch((err) => {
@@ -151,6 +156,8 @@ export default function TextFormatterClient({ slot }) {
       toast.error('Post is empty!');
       return;
     }
+    setPostLoading('schedule');
+
     const payload = {
       content: data,
       time: time.split('T')[1],
@@ -165,6 +172,7 @@ export default function TextFormatterClient({ slot }) {
         editor.commands.setContent(newContent);
         setOpenModel(false);
         setImage(null);
+        setPostLoading(null);
         toast.success(response?.message);
       })
       .catch((err) => {
@@ -348,7 +356,7 @@ export default function TextFormatterClient({ slot }) {
     setImage(data?.imageUrl)
   };
 
-  
+
   return (
     <div className="rich-text-container flex justify-between px-4" style={{ position: 'relative' }}>
 
@@ -523,13 +531,13 @@ export default function TextFormatterClient({ slot }) {
               { label: 'Add an emoji', action: 'emoji' },
               { label: 'Add concrete examples', action: 'examples' },
             ].map(({ label, action }) => (
-              <button
+              <button disabled={loading}
                 key={action}
                 className="relative z-0 rounded bg-black px-6 py-2 text-white text-sm font-medium transition-all duration-300 after:absolute after:left-0 after:top-0 after:-z-10 after:h-full after:w-0 after:rounded after:bg-pink-700 after:transition-all after:duration-300 hover:after:w-full"
                 onClick={() => runApiAndUpdateEditor(action)}
               >
                 {label} {activeAction == action && (
-                  loading ? '⏳ Thinking...' : label
+                  loading ? '⏳' : ''
                 )}
               </button>
             ))}
@@ -543,7 +551,7 @@ export default function TextFormatterClient({ slot }) {
               <span className="absolute inset-0 bg-green-500 rounded-lg transition-all duration-300 group-hover:bg-green-600"></span>
               <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
                 <div className="p-2">
-                  <p className="text-sm font-outerSans font-medium text-white mb-1">Add to Que {slot[0]?.time && convertTo12Hour(slot[0]?.time)}</p>
+                  <p className="text-sm font-outerSans font-medium text-white mb-1">Add to Que {slot[0]?.time && convertTo12Hour(slot[0]?.time)} {postLoading == 'slot' ? "⏳" : ''}</p>
                 </div>
               </div>
             </button>
@@ -553,7 +561,7 @@ export default function TextFormatterClient({ slot }) {
             <span className="absolute inset-0 bg-amber-400 rounded-lg transition-all duration-300 group-hover:bg-amber-500"></span>
             <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
               <div className="p-2">
-                <p className="text-sm font-outerSans font-medium text-white mb-1">Schedule</p>
+                <p className="text-sm font-outerSans font-medium text-white mb-1">Schedule {postLoading == 'schedule' ? "⏳" : ''} </p>
               </div>
             </div>
           </button>
@@ -562,7 +570,7 @@ export default function TextFormatterClient({ slot }) {
             <span className="absolute inset-0 bg-indigo-500 rounded-lg transition-all duration-300 group-hover:bg-indigo-600"></span>
             <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
               <div className="p-2">
-                <p className="text-sm font-outerSans font-medium text-white mb-1">Post now</p>
+                <p className="text-sm font-outerSans font-medium text-white mb-1">Post now {postLoading == 'post' ? "⏳" : ''} </p>
               </div>
             </div>
           </button>
