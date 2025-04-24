@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { verifyLinkedInToken } from '@/middleware/verifyLinkedInToken';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '../../auth/[...NextAuth]/route';
 import path from 'node:path';
 import fs from 'node:fs';
 
