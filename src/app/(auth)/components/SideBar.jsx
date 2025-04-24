@@ -10,8 +10,8 @@ export default function SideBar({ slots }) {
     const { data: session } = useSession();
     return (
         <>
-            <div className="h-screen w-95 bg-black text-white flex flex-col justify-center">
-                <div className="p-6 text-2xl font-bold border-b border-gray-700">
+            <div className="h-screen w-95 bg-white shadow-xl flex flex-col justify-center">
+                <div className="p-6 text-2xl font-bold border-b border-gray-100">
                     {session && (
                         <div className="pb-6 col-span-full md:pb-0 md:col-span-6">
                             <a href="/" className="flex justify-center space-x-3 md:justify-start">
@@ -24,7 +24,7 @@ export default function SideBar({ slots }) {
                                     unoptimized
                                 />
                                 <p className="self-center text-sm
- font-semibold">{session?.user?.name}</p>
+ font-bold">{session?.user?.name}</p>
                             </a>
                         </div>
                     )}
@@ -32,7 +32,7 @@ export default function SideBar({ slots }) {
                 <nav className="flex-1 p-4">
                     <ul className="space-y-4">
                         <li className="flex gap-1">
-                            <button onClick={() => setIsOpen(true)} className="relative text-sm z-0 rounded bg-amber-950 font-bold px-10 py-3 transition-[all_0.3s_ease] after:absolute after:left-0 after:top-0 after:-z-10 after:h-full after:w-0 after:rounded after:bg-pink-700 after:transition-[all_0.3s_ease]  hover:after:w-full ">
+                            <button onClick={() => setIsOpen(true)} className="text-white relative text-sm z-0 rounded bg-blue-500 font-bold px-10 py-3 transition-[all_0.3s_ease] after:absolute after:left-0 after:top-0 after:-z-10 after:h-full after:w-0 after:rounded after:bg-blue-900 after:transition-[all_0.3s_ease]  hover:after:w-full ">
                                 Add Schedule
                             </button>
                         </li>

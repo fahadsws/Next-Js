@@ -358,77 +358,94 @@ export default function TextFormatterClient({ slot }) {
 
 
   return (
-    <div className="rich-text-container flex justify-between px-4" style={{ position: 'relative' }}>
+    <div className="rich-text-container flex gap-5 px-4" style={{ position: 'relative' }}>
 
       <div className="w-[60%]">
-        <div className="editor-toolbar" style={{
-          display: 'flex',
-          gap: '8px',
-          padding: '8px',
-          background: '#f8f9fa',
-          borderRadius: '4px',
-          marginBottom: '8px',
-          position: 'relative'
-        }}>
-          <div className="toolbar-group" style={{ display: 'flex', gap: '4px' }}>
-            <CustomButton
-              icon={IconBold}
-              onClick={() => applyFormat('bold', () => editor?.chain().focus().toggleBold().run())}
-              title="Bold"
-              isActive={editor?.isActive('bold')}
-            />
-            <CustomButton
-              icon={IconItalic}
-              onClick={() => applyFormat('italic', () => editor?.chain().focus().toggleItalic().run())}
-              title="Italic"
-              isActive={editor?.isActive('italic')}
-            />
+        <div className="editor-toolbar bg-white rounded-xl mb-3 shadow-sm relative flex py-5 px-5 gap-3" >
+          <div className="toolbar-group" style={{ display: 'flex', gap: '10px' }}>
+            <div className="bg-white shadow-lg rounded-md flex items-center gap-2 px-1 py-1">
+              <CustomButton
+                icon={IconBold}
+                onClick={() => applyFormat('bold', () => editor?.chain().focus().toggleBold().run())}
+                title="Bold"
+                isActive={editor?.isActive('bold')}
+              />
+            </div>
+            <div className="bg-white shadow-lg rounded-md flex items-center gap-2 px-1 py-1">
+              <CustomButton
+                icon={IconItalic}
+                onClick={() => applyFormat('italic', () => editor?.chain().focus().toggleItalic().run())}
+                title="Italic"
+                isActive={editor?.isActive('italic')}
+              />
+            </div>
           </div>
 
-          <div className="toolbar-group" style={{ display: 'flex', gap: '4px' }}>
-            <CustomButton
-              icon={IconEyeMinus}
-              onClick={() => {
-                setShowEmojiPicker(!showEmojiPicker);
-              }}
-              title="Emoji"
-              isActive={showEmojiPicker}
-            />
+          <div className="toolbar-group mx-1" style={{ display: 'flex', gap: '10px' }}>
+            <div className="bg-white shadow-lg rounded-md flex items-center gap-2 px-1 py-1">
+              <CustomButton
+                icon={IconEyeMinus}
+                onClick={() => {
+                  setShowEmojiPicker(!showEmojiPicker);
+                }}
+                title="Emoji"
+                isActive={showEmojiPicker}
+              />
+            </div>
+            {showEmojiPicker && (
+              <div style={{
+                position: 'absolute',
+                zIndex: 1000,
+                top: '100%',
+                left: 0
+              }}>
+                <EmojiPicker onEmojiClick={onEmojiClick} />
+              </div>
+            )}
+
           </div>
 
-          <div className="toolbar-group" style={{ display: 'flex', gap: '4px' }}>
-            <CustomButton
-              icon={IconArrowBack}
-              onClick={() => editor?.chain().focus().undo().run()}
-              title="Undo"
-            />
+          <div className="toolbar-group mx-1" style={{ display: 'flex', gap: '10px' }}>
+            <div className="bg-white shadow-lg rounded-md flex items-center gap-2 px-1 py-1">
+              <CustomButton
+                icon={IconArrowBack}
+                onClick={() => editor?.chain().focus().undo().run()}
+                title="Undo"
+              />
+            </div>
           </div>
 
-          <div className="toolbar-group" style={{ display: 'flex', gap: '4px', position: 'relative' }}>
-            <CustomButton
-              icon={IconList}
-              onClick={() => applyFormat('bulletList', () => editor?.chain().focus().toggleBulletList().run())}
-              title="Bullet list"
-              isActive={editor?.isActive('bulletList')}
-            />
-            <CustomButton
-              icon={IconListNumbers}
-              onClick={() => applyFormat('orderedList', () => editor?.chain().focus().toggleOrderedList().run())}
-              title="Numbered list"
-              isActive={editor?.isActive('orderedList')}
-            />
-            <CustomButton
-              icon={IconListCheck}
-              onClick={() => {
-                if (!hasSelection()) {
-                  toast.error('Please select a list to format!');
-                  return;
-                }
-                setShowListOptions(!showListOptions);
-              }}
-              title="List options"
-              isActive={showListOptions}
-            />
+          <div className="toolbar-group" style={{ display: 'flex', gap: '10px', position: 'relative' }}>
+            <div className="bg-white shadow-lg rounded-md flex items-center gap-2 px-1 py-1">
+              <CustomButton
+                icon={IconList}
+                onClick={() => applyFormat('bulletList', () => editor?.chain().focus().toggleBulletList().run())}
+                title="Bullet list"
+                isActive={editor?.isActive('bulletList')}
+              />
+            </div>
+            <div className="bg-white shadow-lg rounded-md flex items-center gap-2 px-1 py-1">
+              <CustomButton
+                icon={IconListNumbers}
+                onClick={() => applyFormat('orderedList', () => editor?.chain().focus().toggleOrderedList().run())}
+                title="Numbered list"
+                isActive={editor?.isActive('orderedList')}
+              />
+            </div>
+            <div className="bg-white shadow-lg rounded-md flex items-center gap-2 px-1 py-1">
+              <CustomButton
+                icon={IconListCheck}
+                onClick={() => {
+                  if (!hasSelection()) {
+                    toast.error('Please select a list to format!');
+                    return;
+                  }
+                  setShowListOptions(!showListOptions);
+                }}
+                title="List options"
+                isActive={showListOptions}
+              />
+            </div>
             <div style={{ position: 'relative' }}>
               <input
                 type="file"
@@ -437,13 +454,15 @@ export default function TextFormatterClient({ slot }) {
                 style={{ display: 'none' }}
                 accept="image/*,.pdf"
               />
-              <CustomButton
-                icon={IconPhoto}
-                onClick={() => {
-                  fileInputRef.current?.click();
-                }}
-                title="Upload image/PDF"
-              />
+              <div className="bg-white shadow-lg rounded-md flex items-center gap-2 px-1 py-1">
+                <CustomButton
+                  icon={IconPhoto}
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                  }}
+                  title="Upload image/PDF"
+                />
+              </div>
             </div>
 
             {showListOptions && (
@@ -499,16 +518,6 @@ export default function TextFormatterClient({ slot }) {
           </div>
         </div>
 
-        {showEmojiPicker && (
-          <div style={{
-            position: 'absolute',
-            zIndex: 1000,
-            top: '100%',
-            left: 0
-          }}>
-            <EmojiPicker onEmojiClick={onEmojiClick} />
-          </div>
-        )}
 
         <RichTextEditor editor={editor} >
           <RichTextEditor.Content />
@@ -533,7 +542,7 @@ export default function TextFormatterClient({ slot }) {
             ].map(({ label, action }) => (
               <button disabled={loading}
                 key={action}
-                className="relative z-0 rounded bg-black px-6 py-2 text-white text-sm font-medium transition-all duration-300 after:absolute after:left-0 after:top-0 after:-z-10 after:h-full after:w-0 after:rounded after:bg-pink-700 after:transition-all after:duration-300 hover:after:w-full"
+                className="relative z-0 rounded bg-blue-800 px-6 py-2 text-white text-sm font-medium transition-all duration-300 after:absolute after:left-0 after:top-0 after:-z-10 after:h-full after:w-0 after:rounded after:bg-blue-900 after:transition-all after:duration-300 hover:after:w-full"
                 onClick={() => runApiAndUpdateEditor(action)}
               >
                 {label} {activeAction == action && (
