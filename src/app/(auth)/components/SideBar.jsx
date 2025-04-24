@@ -1,50 +1,39 @@
-'use client'
-
-import SlotModal from "@/components/layout/SlotModal";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
+'use client';
 import { useState } from "react";
+import Slots from "./Slots";
+import Posts from "./Posts";
 
-export default function SideBar({ slots }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const { data: session } = useSession();
+export default function SideBar({ slots, posts }) {
+    const [tab, setTab] = useState(1);
+
     return (
         <>
-            <div className="h-screen w-95 bg-white shadow-xl flex flex-col justify-center">
-                <div className="p-6 text-2xl font-bold border-b border-gray-100">
-                    {session && (
-                        <div className="pb-6 col-span-full md:pb-0 md:col-span-6">
-                            <a href="/" className="flex justify-center space-x-3 md:justify-start">
-                                <Image
-                                    src={`${session?.user?.image}`}
-                                    alt="User Avatar"
-                                    width={30}
-                                    height={30}
-                                    className="rounded-full"
-                                    unoptimized
-                                />
-                                <p className="self-center text-sm
- font-bold">{session?.user?.name}</p>
-                            </a>
-                        </div>
-                    )}
-                </div>
-                <nav className="flex-1 p-4">
-                    <ul className="space-y-4">
-                        <li className="flex gap-1">
-                            <button onClick={() => setIsOpen(true)} className="text-white relative text-sm z-0 rounded bg-blue-500 font-bold px-10 py-3 transition-[all_0.3s_ease] after:absolute after:left-0 after:top-0 after:-z-10 after:h-full after:w-0 after:rounded after:bg-blue-900 after:transition-[all_0.3s_ease]  hover:after:w-full ">
-                                Add Schedule
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
+            <div className="flex space-x-6 mb-6">
+                {["Queue", "Drafts", "Posted"].map((label, index) => {
+                    const tabIndex = index + 1;
+                    return (
+                        <button
+                            key={label}
+                            onClick={() => setTab(tabIndex)}
+                            className={`pb-2 transition-all duration-300 text-sm ${tab === tabIndex
+                                ? 'border-b-2 border-blue-600 text-blue-600 font-semibold'
+                                : 'text-gray-600 hover:text-blue-600'
+                                }`}
+                        >
+                            {label}
+                        </button>
+                    );
+                })}
             </div>
+            <button className="flex items-center space-x-2 text-blue-600 font-semibold mb-4 hover:text-blue-700 transition-all duration-200">
+                <span className="text-xl">＋</span>
+                <span>New Post</span>
+            </button>
 
-            {isOpen && (
-                <SlotModal setIsOpen={setIsOpen} slots={slots} />
-            )}
+            <div className="transition-opacity duration-300 ease-in-out opacity-100 animate-fadeIn">
+                {tab === 1 && <Slots slots={slots} />}
+                {tab === 3 && <Posts posts={posts} />}
+            </div>
         </>
     );
 }
-
-
