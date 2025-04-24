@@ -3,6 +3,8 @@ import { verifyLinkedInToken } from '@/middleware/verifyLinkedInToken';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
+import path from 'node:path';
+import fs from 'node:fs';
 
 const prisma = new PrismaClient();
 
@@ -29,10 +31,10 @@ export async function POST(request) {
 
 
         let slotId = null;
-        // let imageUpload;
-        // if (image) {
-        //     imageUpload = await Upload(image);
-        // }
+        let imageUpload;
+        if (image) {
+            imageUpload = await Upload(image,verified?.data.linkedinId);
+        }
 
         if (is_schedule && time && date) {
             const slot = await prisma.slots.create({
@@ -41,8 +43,9 @@ export async function POST(request) {
                     date,
                     user_id: verified?.data.linkedinId,
                     is_schedule: 1,
-                    upload_id: imageUpload?.url ?? 0,
-                    image_id: imageUpload?.data ?? 0,
+                    upload_id: imageUpload?.url ?? null,
+                    image_id: imageUpload?.data ?? null,
+                    is_file: imageUpload?.data ?? 1
                 },
             });
             slotId = slot.id;
@@ -57,6 +60,9 @@ export async function POST(request) {
                 author: verified?.data.linkedinId,
                 content,
                 is_slot: slotId || 0,
+                upload_id: imageUpload?.url ?? null,
+                image_id: imageUpload?.data ?? null,
+                is_file: imageUpload?.data ?? 1
             },
         });
 
@@ -76,9 +82,8 @@ export async function POST(request) {
 }
 
 
-async function Upload(image_path) {
+async function Upload(image_path,linkedinId) {
     const session = await getServerSession(authOptions);
-    console.log('IMAGE',image_path)
     const registerUploadRes = await fetch(
         'https://api.linkedin.com/v2/assets?action=registerUpload',
         {
@@ -90,7 +95,7 @@ async function Upload(image_path) {
             body: JSON.stringify({
                 registerUploadRequest: {
                     recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
-                    owner: `urn:li:person:${session?.uniid}`,
+                    owner: `urn:li:person:${linkedinId}`,
                     serviceRelationships: [
                         {
                             relationshipType: 'OWNER',
@@ -112,7 +117,7 @@ async function Upload(image_path) {
     const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
         headers: {
-            'Authorization': `Bearer ${ACCESS_TOKEN}`,
+            'Authorization': `Bearer ${session?.accessToken}`,
             'Content-Type': 'image/jpeg',
             'media-type-family': 'STILLIMAGE',
         },

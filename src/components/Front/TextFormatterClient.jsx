@@ -106,6 +106,7 @@ export default function TextFormatterClient({ slot }) {
       .then((response) => {
         const newContent = '';
         editor.commands.setContent(newContent);
+        setImage(null);
         setOpenModel(false);
         toast.success(response?.message);
       })
@@ -133,6 +134,7 @@ export default function TextFormatterClient({ slot }) {
         const newContent = '';
         editor.commands.setContent(newContent);
         setOpenModel(false);
+        setImage(null);
         toast.success(response?.message);
       })
       .catch((err) => {
@@ -162,6 +164,7 @@ export default function TextFormatterClient({ slot }) {
         const newContent = '';
         editor.commands.setContent(newContent);
         setOpenModel(false);
+        setImage(null);
         toast.success(response?.message);
       })
       .catch((err) => {
@@ -345,15 +348,7 @@ export default function TextFormatterClient({ slot }) {
     setImage(data?.imageUrl)
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setImage(previewUrl);
-    }
-  };
   
-
   return (
     <div className="rich-text-container flex justify-between px-4" style={{ position: 'relative' }}>
 
@@ -429,7 +424,7 @@ export default function TextFormatterClient({ slot }) {
             <div style={{ position: 'relative' }}>
               <input
                 type="file"
-                onChange={handleFileChange}
+                onChange={handleSubmit}
                 ref={fileInputRef}
                 style={{ display: 'none' }}
                 accept="image/*,.pdf"
@@ -574,7 +569,7 @@ export default function TextFormatterClient({ slot }) {
         </div>
       </div>
       <div className="my-20">
-        {editor && <PostBox content={editor.getText() ? editor.getHTML() : null} />}
+        {editor && <PostBox image={image} content={editor.getText() ? editor.getHTML() : null} />}
       </div>
       {openModel && <PostModal slot={slot} setOpenModel={setOpenModel} setTime={setTime} time={time} handlePostNow={handlePostNow} handlSchedulePost={handlSchedulePost} handlSlotPost={handlSlotPost} />}
     </div>

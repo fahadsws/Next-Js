@@ -1,9 +1,8 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { getServerSession } from "next-auth";
+'use client'
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-export default async function Header() {
-    const session = await getServerSession(authOptions);
+export default function Header({ session }) {
     return (
         <>
             <header className="header">

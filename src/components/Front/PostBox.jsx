@@ -2,7 +2,7 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { FaHeart, FaRegCommentDots, FaRetweet, FaPaperPlane } from 'react-icons/fa';
 
-export default function PostBox({ content }) {
+export default function PostBox({ content, image }) {
   const { data: session } = useSession();
   return (
     <div className="flex justify-center items-start">
@@ -43,6 +43,18 @@ export default function PostBox({ content }) {
                   <span className="text-blue-600 ml-1 cursor-pointer">…more</span>
                 </p>
                 <p className="mt-2 text-gray-500">This line will appear below the more...</p>
+              </div>
+            )}
+
+            {image && (
+              <div className="mt-3">
+                <Image
+                  src={image}
+                  alt="Post Image"
+                  width={200}
+                  height={150}
+                  className="rounded-lg"
+                />
               </div>
             )}
 
