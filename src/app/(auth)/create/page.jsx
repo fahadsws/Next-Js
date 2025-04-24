@@ -1,7 +1,7 @@
 import TextFormatterClient from "@/components/Front/TextFormatterClient";
 import SideBar from "../components/SideBar";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...NextAuth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/api/prisma";
 import { getISTTime } from "@/lib/api/user";
 export default async function Dashboard() {
