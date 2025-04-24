@@ -82,6 +82,7 @@
 // export { handler as GET, handler as POST };
 
 
+import prisma from "@/lib/api/prisma";
 import NextAuth from "next-auth";
 import LinkedInProvider from "next-auth/providers/linkedin";
 
@@ -115,35 +116,64 @@ export const authOptions = {
         token.accessToken = account.access_token;
       }
 
+      // if (profile) {
+      //   try {
+      //     const res = await fetch(`${process.env.BASE_API_URL}login`, {
+      //       method: "POST",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify({
+      //         uniid: profile.sub,
+      //         name: profile.name,
+      //         email: profile.email,
+      //         image: profile.picture,
+      //         accessToken: account.access_token,
+      //       }),
+      //     });
+
+      //     const result = await res.json();
+      //     const data = result.data;
+      //     if (data.status) {
+      //       token.uniid = data.uniid;
+      //       token.userId = data.id;
+      //       token.name = data.name;
+      //       token.email = data.email;
+      //       toast.success(`Login Successfully`);
+      //     }
+      //   } catch (error) {
+      //     console.error("❌ Failed to call backend:", error);
+      //   }
+      // }
+
       if (profile) {
         try {
-          const res = await fetch(`${process.env.BASE_API_URL}login`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              uniid: profile.sub,
-              name: profile.name,
-              email: profile.email,
-              image: profile.picture,
-              accessToken: account.access_token,
-            }),
+          const { sub: uniid, name, email, picture: image } = profile;
+          let user = await prisma.users.findFirst({
+            where: { uniid },
           });
 
-          const result = await res.json();
-          const data = result.data;
-          if (data.status) {
-            token.uniid = data.uniid;
-            token.userId = data.id;
-            token.name = data.name;
-            token.email = data.email;
-            toast.success(`Login Successfully`);
+          if (!user) {
+            user = await prisma.users.create({
+              data: {
+                uniid,
+                name,
+                email,
+                profile_image: image,
+                accessToken: account.access_token,
+                is_trial: 1,
+              },
+            });
           }
-        } catch (error) {
-          console.error("❌ Failed to call backend:", error);
+          token.uniid = user.uniid;
+          token.userId = user.id;
+          token.name = user.name;
+          token.email = user.email;
+        } catch (err) {
+          console.error("❌ Prisma error:", err.message);
         }
       }
+
 
       return token;
     },
