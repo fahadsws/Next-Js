@@ -9,7 +9,7 @@ export default function SideBar({ slots, posts }) {
 
     return (
         <>
-            <div className="flex space-x-6 mb-6">
+            <div className="flex space-x-6 mb-6 justify-between">
                 {["Queue", "Drafts", "Posted"].map((label, index) => {
                     const tabIndex = index + 1;
                     return (

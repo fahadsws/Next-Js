@@ -11,7 +11,7 @@ export default async function MainWrapper({ slots, session }) {
     });
     return (
         <>
-            <div className="h-screen w-[360px] bg-white shadow-xl flex flex-col p-4">
+            <div className="h-screen w-[450px] bg-white shadow-xl flex flex-col p-4">
                 <Link href='/'>
                     <div className="flex items-center space-x-3 border-b border-gray-100 pb-4 mb-4">
                         <Image
@@ -28,7 +28,7 @@ export default async function MainWrapper({ slots, session }) {
 
 
 
-                <div>
+                <div className="overflow-y-auto">
                     <SideBar slots={slots} posts={posts} />
                 </div>
             </div>

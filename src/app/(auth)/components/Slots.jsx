@@ -5,7 +5,27 @@ import { useState } from "react";
 
 export default function Slots({ slots }) {
     const [isOpen, setIsOpen] = useState(false);
+    const getNext10Days = () => {
+        const days = [];
+        const today = new Date();
+        for (let i = 1; i < 10; i++) {
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+            days.push(date);
+        }
+        return days;
+    };
 
+    const getDayName = (date) =>
+        date.toLocaleDateString('en-US', { weekday: 'long' });
+
+    const getFormattedDate = (date) =>
+        date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+
+    const isSlotAvailable = (slot, dayIndex) => {
+        return slot.day.split(',').map(Number).includes(dayIndex);
+    };
     return (
         <>
             <div className="mb-4">
@@ -52,6 +72,44 @@ export default function Slots({ slots }) {
                     ))}
                 </div>
             </div> */}
+
+            <div className="space-y-6 overflow-y-auto flex-1 pr-2">
+                {getNext10Days().map((date) => {
+                    const dayIndex = date.getDay();
+                    const daySlots = slots.filter((slot) => isSlotAvailable(slot, dayIndex));
+
+                    if (daySlots.length === 0) return null;
+
+                    return (
+                        <div key={date.toDateString()}>
+                            <p className="text-smmb-2 font-mono text-black">
+                                {getDayName(date)}{" "}
+                                <span className="text-black">{getFormattedDate(date)}</span>
+                            </p>
+
+                            {daySlots.map((slot) => {
+                                const hour = parseInt(slot.time.slice(0, 2), 10);
+                                const isPM = hour >= 12;
+                                const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+                                const formattedTime = `${hour12}:${slot.time.slice(3)} ${isPM ? "PM" : "AM"}`;
+                                return (
+                                    <div
+                                        key={slot.id}
+                                        className="flex justify-between items-center px-4 py-3 border rounded-md mb-2"
+                                    >
+                                        <span className="text-sm text-gray-700">{formattedTime}</span>
+                                        <button className="text-blue-600 font-medium text-sm hover:text-blue-900">
+                                            + New
+                                        </button>
+                                    </div>
+                                );
+                            })}
+
+
+                        </div>
+                    );
+                })}
+            </div>
 
             {isOpen && <SlotModal setIsOpen={setIsOpen} slots={slots} />}
         </>
