@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Slots from "./Slots";
 import Posts from "./Posts";
+import Link from "next/link";
 
 export default function SideBar({ slots, posts }) {
     const [tab, setTab] = useState(1);
@@ -25,10 +26,10 @@ export default function SideBar({ slots, posts }) {
                     );
                 })}
             </div>
-            <button className="flex items-center space-x-2 text-blue-600 font-semibold mb-4 hover:text-blue-700 transition-all duration-200">
+            <Link href='/create' className="flex items-center space-x-2 text-blue-600 font-semibold mb-4 hover:text-blue-700 transition-all duration-200">
                 <span className="text-xl">＋</span>
                 <span>New Post</span>
-            </button>
+            </Link>
 
             <div className="transition-opacity duration-300 ease-in-out opacity-100 animate-fadeIn">
                 {tab === 1 && <Slots slots={slots} />}
