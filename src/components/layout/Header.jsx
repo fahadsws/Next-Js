@@ -1,5 +1,5 @@
 'use client'
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 export default function Header({ session }) {
@@ -14,6 +14,7 @@ export default function Header({ session }) {
                     {session ? (
                         <>
                             <Link href="/create" className="try-free-btn">Dashboard</Link>
+                            <p onClick={() => signOut()} className=" bg-red-600 rounded-sm p-2 px-5 font-medium text-white">Log Out</p>
                         </>
                     ) : (
                         <>

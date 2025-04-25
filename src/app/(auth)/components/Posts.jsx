@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import Link from "next/link";
 
 export default function Posts({ posts }) {
     const truncateContent = (content, limit = 20) => {
@@ -17,14 +18,14 @@ export default function Posts({ posts }) {
                 }
 
                 return (
-                    <div key={post.id} className="p-4 bg-white rounded shadow-sm">
+                    <Link href={`/post/${post.id}`} key={post.id} className="p-4 rounded">
                         <div className="text-sm text-gray-500 mb-1">
                             {dt.isValid ? dt.toFormat("ccc LLL dd, hh:mm a") : "Invalid date"}
                         </div>
                         <p className="text-gray-800 text-sm whitespace-pre-line">
                             {truncateContent(post.content)}
                         </p>
-                    </div>
+                    </Link>
                 );
             })}
         </div>

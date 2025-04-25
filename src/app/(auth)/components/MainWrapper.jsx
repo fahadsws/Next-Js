@@ -7,11 +7,12 @@ export default async function MainWrapper({ slots, session }) {
     const posts = await prisma.posts.findMany({
         where: {
             author: session?.uniid,
+            is_post: 1
         }
     });
     return (
         <>
-            <div className="h-screen w-[450px] bg-white shadow-xl flex flex-col p-4">
+            <div className="h-screen w-[360px] bg-white shadow-xl flex flex-col p-4">
                 <Link href='/'>
                     <div className="flex items-center space-x-3 border-b border-gray-100 pb-4 mb-4">
                         <Image
@@ -22,9 +23,12 @@ export default async function MainWrapper({ slots, session }) {
                             className="rounded-full"
                             unoptimized
                         />
-                        <p className="text-base font-semibold">{session?.user?.name}</p>
+                        <div className="">
+                            <p className="text-base font-semibold">{session?.user?.name}</p>
+                        </div>
                     </div>
                 </Link>
+
 
 
 

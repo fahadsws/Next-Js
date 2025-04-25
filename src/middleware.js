@@ -26,6 +26,7 @@ export async function middleware(request) {
 export const config = {
   matcher: [
     '/create/:path*',
+    '/post/:id/:path*',
     '/tools',
     '/login',
     '/register',

@@ -15,11 +15,8 @@ export default async function Dashboard() {
   });
   const queslots = slots.filter(slot => slot.time >= currentISTTime);
   return (
-    <main className="flex items-start">
-      <MainWrapper slots={slots} session={session} />
-      <div className="textformater my-20">
-        <TextFormatterClient slot={queslots} />
-      </div>
+    <main className="my-20 ">
+      <TextFormatterClient slot={queslots} />
     </main>
   )
 }

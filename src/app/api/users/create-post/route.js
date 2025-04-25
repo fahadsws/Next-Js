@@ -33,7 +33,7 @@ export async function POST(request) {
         let slotId = null;
         let imageUpload;
         if (image) {
-            imageUpload = await Upload(image,verified?.data.linkedinId);
+            imageUpload = await Upload(image, verified?.data.linkedinId);
         }
 
         if (is_schedule && time && date) {
@@ -59,7 +59,7 @@ export async function POST(request) {
                 is_slot: slotId || 0,
                 upload_id: imageUpload?.url ?? null,
                 image_id: imageUpload?.data ?? null,
-                is_file: imageUpload?.data ?? 1
+                is_file: imageUpload?.data ? 1 : 0
             },
         });
 
@@ -79,7 +79,7 @@ export async function POST(request) {
 }
 
 
-async function Upload(image_path,linkedinId) {
+async function Upload(image_path, linkedinId) {
     const session = await getServerSession(authOptions);
     const registerUploadRes = await fetch(
         'https://api.linkedin.com/v2/assets?action=registerUpload',
