@@ -1,12 +1,9 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { getServerSession } from "next-auth";
 import Image from "next/image";
 import SideBar from "./SideBar";
 import Link from "next/link";
 import prisma from "@/lib/api/prisma";
 
-export default async function MainWrapper({slots}) {
-    const session = await getServerSession(authOptions);
+export default async function MainWrapper({ slots, session }) {
     const posts = await prisma.posts.findMany({
         where: {
             author: session?.uniid,

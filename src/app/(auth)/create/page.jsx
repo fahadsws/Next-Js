@@ -1,5 +1,4 @@
 import TextFormatterClient from "@/components/Front/TextFormatterClient";
-import SideBar from "../components/SideBar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/api/prisma";
@@ -14,18 +13,10 @@ export default async function Dashboard() {
       is_schedule: 0,
     }
   });
-  const queslots = await prisma.slots.findMany({
-    where: {
-      user_id: session?.uniid,
-      is_schedule: 0,
-      time: {
-        gte: currentISTTime,
-      },
-    }
-  });
+  const queslots = slots.filter(slot => slot.time >= currentISTTime);
   return (
     <main className="flex items-start">
-      <MainWrapper slots={slots} />
+      <MainWrapper slots={slots} session={session} />
       <div className="textformater my-20">
         <TextFormatterClient slot={queslots} />
       </div>

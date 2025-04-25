@@ -10,15 +10,15 @@ export default function Header({ session }) {
                     <Image src="/assets/Images/logo.jpg" alt="Typegrow" width={40} height={40} />
                 </div>
                 <div className="header-right">
-                    <Link href="/free-tools" >Free Tools</Link>
+                    <Link href="/" >Free Tools</Link>
                     {session ? (
                         <>
                             <Link href="/create" className="try-free-btn">Dashboard</Link>
                         </>
                     ) : (
                         <>
-                            <Link href="/login">Login</Link>
-                            <button onClick={() => signIn('linkedin')} className="try-free-btn">Try for Free</button>
+                            <button onClick={() => signIn('linkedin')} className="cursor-pointer">Login</button>
+                            <button onClick={() => signIn('linkedin')} className="try-free-btn cursor-pointer">Try for Free</button>
                         </>
                     )}
                 </div>
