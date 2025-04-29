@@ -3,7 +3,7 @@
 import SlotModal from "@/components/layout/SlotModal";
 import { useState } from "react";
 
-export default function Slots({ slots }) {
+export default function Slots({ slots, user_id }) {
     const [isOpen, setIsOpen] = useState(false);
     const getNext10Days = () => {
         const days = [];
@@ -26,6 +26,10 @@ export default function Slots({ slots }) {
     const isSlotAvailable = (slot, dayIndex) => {
         return slot.day.split(',').map(Number).includes(dayIndex);
     };
+
+    const handleSlotClick = async (date, slot) => {
+        const isoDate = date.toISOString().split('T')[0];
+    }
     return (
         <>
             <div className="mb-4">
@@ -98,7 +102,7 @@ export default function Slots({ slots }) {
                                         className="flex justify-between items-center px-4 py-3 border rounded-md mb-2"
                                     >
                                         <span className="text-sm text-gray-700">{formattedTime}</span>
-                                        <button className="text-blue-600 font-medium text-sm hover:text-blue-900">
+                                        <button onClick={() => handleSlotClick(date, slot)} className="text-blue-600 font-medium text-sm hover:text-blue-900">
                                             + New
                                         </button>
                                     </div>

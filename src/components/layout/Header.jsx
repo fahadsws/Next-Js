@@ -14,7 +14,7 @@ export default function Header({ session }) {
                     {session ? (
                         <>
                             <Link href="/create" className="try-free-btn">Dashboard</Link>
-                            <p onClick={() => signOut()} className=" bg-red-600 rounded-sm p-2 px-5 font-medium text-white">Log Out</p>
+                            <p onClick={() => signOut()} className=" bg-red-600 rounded-sm p-2 px-5 font-medium text-white cursor-pointer">Log Out</p>
                         </>
                     ) : (
                         <>

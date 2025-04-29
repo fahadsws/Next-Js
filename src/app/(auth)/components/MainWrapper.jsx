@@ -33,7 +33,7 @@ export default async function MainWrapper({ slots, session }) {
 
 
                 <div className="overflow-y-auto">
-                    <SideBar slots={slots} posts={posts} />
+                    <SideBar slots={slots} user_id={session?.uniid} posts={posts} />
                 </div>
             </div>
         </>

@@ -4,7 +4,7 @@ import Slots from "./Slots";
 import Posts from "./Posts";
 import Link from "next/link";
 
-export default function SideBar({ slots, posts }) {
+export default function SideBar({ slots, posts ,user_id }) {
     const [tab, setTab] = useState(1);
 
     return (
@@ -32,7 +32,7 @@ export default function SideBar({ slots, posts }) {
             </Link>
 
             <div className="transition-opacity duration-300 ease-in-out opacity-100 animate-fadeIn">
-                {tab === 1 && <Slots slots={slots} />}
+                {tab === 1 && <Slots slots={slots} user_id={user_id} />}
                 {tab === 3 && <Posts posts={posts} />}
             </div>
         </>
