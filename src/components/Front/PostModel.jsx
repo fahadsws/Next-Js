@@ -1,7 +1,9 @@
+import { getNextFreeSlot } from "@/lib/actions/post";
+import { convertTo12Hour, formatDate } from "@/lib/api/user";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
-export default function PostModal({ slot, time, setOpenModel, setTime, handlePostNow, handlSchedulePost, handlSlotPost }) {
+export default function PostModal({ freeSlot, slot, time, setOpenModel, setTime, handlePostNow, handlSchedulePost, handlSlotPost }) {
     const { data: session } = useSession();
     return (
         <>
@@ -24,15 +26,20 @@ export default function PostModal({ slot, time, setOpenModel, setTime, handlePos
                         <input
                             onChange={(e) => setTime(e.target.value)}
                             type="datetime-local"
+                            value={time}
                             className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm"
                         />
                     </div>
 
-                    {slot[0]?.time
+                    {(slot[0]?.time || freeSlot?.status)
                         && (
                             <div className="px-4 py-2 space-y-2">
                                 <button onClick={handlSlotPost} className="w-full border border-gray-300 rounded-lg py-2 text-sm hover:bg-gray-50">
-                                    → Free slot at {slot[0]?.time} AM/PM
+                                    → Free slot at {
+                                        slot[0]?.time
+                                            ? `${formatDate()} on ${convertTo12Hour(slot[0]?.time)}`
+                                            : `${convertTo12Hour(freeSlot?.data?.time)} on ${formatDate(freeSlot?.data?.date)}`
+                                    }
                                 </button>
                                 <button onClick={handlePostNow} className="w-full border border-gray-300 rounded-lg py-2 text-sm hover:bg-gray-50">
                                     Post now
@@ -41,10 +48,10 @@ export default function PostModal({ slot, time, setOpenModel, setTime, handlePos
                         )
                     }
 
-                    {time && (
+                    {(time) && (
                         <div className="px-4 py-3">
                             <button onClick={handlSchedulePost} className="w-full bg-orange-500 text-white font-medium rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-orange-600 transition">
-                                Confirm {time}
+                                Confirm {formatDate(time)} at {convertTo12Hour(time?.split('T')[1])}
                             </button>
                         </div>
                     )}

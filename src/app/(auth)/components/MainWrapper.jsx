@@ -2,14 +2,28 @@ import Image from "next/image";
 import SideBar from "./SideBar";
 import Link from "next/link";
 import prisma from "@/lib/api/prisma";
+import { getNextFreeSlot } from "@/lib/actions/post";
 
-export default async function MainWrapper({ slots, session }) {
+export default async function MainWrapper({ slots: slot, session }) {
     const posts = await prisma.posts.findMany({
         where: {
             author: session?.uniid,
-            is_post: 1
-        }
+        },
     });
+    const draftPosts = posts.filter(post => post.is_draft == 1);
+    const posted = posts.filter(post => post.is_post == 1 && post.is_draft == 0);
+
+    const notPosts = posts.filter(post => post.is_post === 0 && post.is_draft === 0);
+
+    const slotIds = [...new Set(notPosts.map(post => post.is_slot))];
+
+    const slots = await prisma.slots.findMany({
+        where: { id: { in: slotIds } },
+    });
+    const notPostsWithSlots = notPosts.map(post => ({
+        ...post,
+        slot: slots.find(slot => slot.id === post.is_slot),
+    }));
     return (
         <>
             <div className="h-screen w-[360px] bg-white shadow-xl flex flex-col p-4">
@@ -28,12 +42,8 @@ export default async function MainWrapper({ slots, session }) {
                         </div>
                     </div>
                 </Link>
-
-
-
-
                 <div className="overflow-y-auto">
-                    <SideBar slots={slots} user_id={session?.uniid} posts={posts} />
+                    <SideBar slots={slot} user_id={session?.uniid} posts={posted} draftPosts={draftPosts} notPosts={notPostsWithSlots} />
                 </div>
             </div>
         </>

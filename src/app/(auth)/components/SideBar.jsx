@@ -3,10 +3,14 @@ import { useState } from "react";
 import Slots from "./Slots";
 import Posts from "./Posts";
 import Link from "next/link";
+import Draft from "./Draft";
 
-export default function SideBar({ slots, posts ,user_id }) {
+export default function SideBar({ slots, posts, user_id, draftPosts, notPosts }) {
     const [tab, setTab] = useState(1);
-
+    const truncateContent = (content, limit = 20) => {
+        if (content.length <= limit) return content;
+        return content.slice(0, limit) + "…";
+    };
     return (
         <>
             <div className="flex space-x-6 mb-6 justify-between">
@@ -21,7 +25,7 @@ export default function SideBar({ slots, posts ,user_id }) {
                                 : 'text-gray-600 hover:text-blue-600'
                                 }`}
                         >
-                            {label}
+                            {label} {label == 'Queue' && <span className="text-xs text-gray-400">({notPosts.length})</span>}
                         </button>
                     );
                 })}
@@ -32,8 +36,9 @@ export default function SideBar({ slots, posts ,user_id }) {
             </Link>
 
             <div className="transition-opacity duration-300 ease-in-out opacity-100 animate-fadeIn">
-                {tab === 1 && <Slots slots={slots} user_id={user_id} />}
-                {tab === 3 && <Posts posts={posts} />}
+                {tab === 1 && <Slots slots={slots} user_id={user_id} notPosts={notPosts} truncateContent={truncateContent} />}
+                {tab === 2 && <Draft posts={draftPosts} truncateContent={truncateContent} />}
+                {tab === 3 && <Posts posts={posts} truncateContent={truncateContent} />}
             </div>
         </>
     );

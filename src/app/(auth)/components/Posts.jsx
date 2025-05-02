@@ -1,11 +1,7 @@
 import { DateTime } from "luxon";
 import Link from "next/link";
 
-export default function Posts({ posts }) {
-    const truncateContent = (content, limit = 20) => {
-        if (content.length <= limit) return content;
-        return content.slice(0, limit) + "…";
-    };
+export default function Posts({ posts, truncateContent }) {
     return (
         <div className="space-y-4">
             {posts?.map((post) => {

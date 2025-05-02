@@ -26,7 +26,7 @@ export async function POST(request) {
         }
 
         const verified = await verifyLinkedInToken(token);
-        const { content, is_slot, time, date, is_schedule, image } = body;
+        const { content, is_slot, time, date, is_schedule, image, id } = body;
 
 
 
@@ -52,16 +52,43 @@ export async function POST(request) {
             slotId = is_slot;
         }
 
-        const post = await prisma.posts.create({
-            data: {
-                author: verified?.data.linkedinId,
-                content,
-                is_slot: slotId || 0,
-                upload_id: imageUpload?.url ?? null,
-                image_id: imageUpload?.data ?? null,
-                is_file: imageUpload?.data ? 1 : 0
-            },
-        });
+        let post;
+
+        // const post = await prisma.posts.create({
+        //     data: {
+        //         author: verified?.data.linkedinId,
+        //         content,
+        //         is_slot: slotId || 0,
+        //         upload_id: imageUpload?.url ?? null,
+        //         image_id: imageUpload?.data ?? null,
+        //         is_file: imageUpload?.data ? 1 : 0
+        //     },
+        // });
+
+        if (id) {
+            post = await prisma.posts.update({
+                where: { id },
+                data: {
+                    content,
+                    is_slot: slotId || is_slot || 0,
+                    upload_id: imageUpload?.url ?? undefined,
+                    image_id: imageUpload?.data ?? undefined,
+                    is_file: imageUpload?.data ? 1 : 0,
+                    is_draft: 0,
+                },
+            });
+        } else {
+            post = await prisma.posts.create({
+                data: {
+                    author: verified?.data.linkedinId,
+                    content,
+                    is_slot: slotId || 0,
+                    upload_id: imageUpload?.url ?? null,
+                    image_id: imageUpload?.data ?? null,
+                    is_file: imageUpload?.data ? 1 : 0,
+                },
+            });
+        }
 
         return NextResponse.json({
             status: true,

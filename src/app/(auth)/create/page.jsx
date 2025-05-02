@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/api/prisma";
 import { getISTTime } from "@/lib/api/user";
-import MainWrapper from "../components/MainWrapper";
+import { getNextFreeSlot } from "@/lib/actions/post";
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
   const currentISTTime = getISTTime().toFormat('HH:mm');
@@ -14,9 +14,10 @@ export default async function Dashboard() {
     }
   });
   const queslots = slots.filter(slot => slot.time >= currentISTTime);
+  const nextSlot = await getNextFreeSlot(session?.uniid);
   return (
     <main className="my-20 ">
-      <TextFormatterClient slot={queslots} />
+      <TextFormatterClient slot={queslots} freeSlot={nextSlot} />
     </main>
   )
 }

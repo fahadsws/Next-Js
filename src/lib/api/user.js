@@ -23,4 +23,6 @@ export function convertTo12Hour(time24) {
 
 export const getISTTime = () => {
     return DateTime.now().setZone('Asia/Kolkata');
-  };
+};
+
+export const formatDate = (date = new Date()) => new Date(date).toLocaleDateString('en-GB', { weekday: 'short', month: 'short',day: 'numeric' });
