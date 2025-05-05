@@ -3,6 +3,8 @@ import { signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 export default function Header({ session }) {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // console.log("Timezone: ", timezone);
     return (
         <>
             <header className="header">
@@ -19,7 +21,10 @@ export default function Header({ session }) {
                     ) : (
                         <>
                             <button onClick={() => signIn('linkedin')} className="cursor-pointer">Login</button>
-                            <button onClick={() => signIn('linkedin')} className="try-free-btn cursor-pointer">Try for Free</button>
+                            <button onClick={() => {
+                                document.cookie = `timezone=${timezone}; path=/; SameSite=Lax`;
+                                signIn("linkedin");
+                            }} className="try-free-btn cursor-pointer">Try for Free</button>
                         </>
                     )}
                 </div>

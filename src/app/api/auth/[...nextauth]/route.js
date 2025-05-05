@@ -85,6 +85,7 @@
 import prisma from "@/lib/api/prisma";
 import NextAuth from "next-auth";
 import LinkedInProvider from "next-auth/providers/linkedin";
+import { cookies } from "next/headers";
 
 export const authOptions = {
   providers: [
@@ -112,6 +113,8 @@ export const authOptions = {
 
   callbacks: {
     async jwt({ token, user, account, profile }) {
+      const cookieStore = await cookies();
+      const timeZone = cookieStore.get("timezone")?.value ?? null; 
       if (account?.access_token) {
         token.accessToken = account.access_token;
       }
@@ -159,6 +162,7 @@ export const authOptions = {
                 uniid,
                 name,
                 email,
+                timeZone,
                 profile_image: image,
                 accessToken: account.access_token,
                 is_trial: 1,
@@ -169,6 +173,7 @@ export const authOptions = {
           token.userId = user.id;
           token.name = user.name;
           token.email = user.email;
+          token.timeZone = user.timeZone;
         } catch (err) {
           console.error("❌ Prisma error:", err.message);
         }
@@ -184,6 +189,7 @@ export const authOptions = {
       session.accessToken = token.accessToken;
       session.name = token.name ?? session.user?.name;
       session.email = token.email ?? session.user?.email;
+      session.timeZone = token.timeZone;
       return session;
     },
   },

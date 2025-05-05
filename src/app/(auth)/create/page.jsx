@@ -15,6 +15,7 @@ export default async function Dashboard() {
   });
   const queslots = slots.filter(slot => slot.time >= currentISTTime);
   const nextSlot = await getNextFreeSlot(session?.uniid);
+  console.log(currentISTTime, "currentISTTime")
   return (
     <main className="my-20 ">
       <TextFormatterClient slot={queslots} freeSlot={nextSlot} />

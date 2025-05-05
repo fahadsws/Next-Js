@@ -18,9 +18,9 @@ export default function PostModal({ freeSlot, slot, time, setOpenModel, setTime,
                         </button>
                     </div>
 
-                    {/* <div className="px-4 py-2 text-sm text-gray-600">
-                        All times in <span className="bg-gray-200 px-2 py-0.5 rounded">Asia/Kolkata (02:59 PM)</span> timezone
-                    </div> */}
+                    <div className="px-4 py-2 text-sm text-gray-600 text-center my-3">
+                        All times in <span className="bg-gray-200 px-2 py-0.5 rounded">{session?.timeZone}</span> timezone
+                    </div>
 
                     <div className="px-4 py-2">
                         <input

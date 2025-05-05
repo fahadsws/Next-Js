@@ -24,7 +24,8 @@ export default async function MainWrapper({ slots: slot, session }) {
     LEFT JOIN 
         \`posts\` p ON s.id = p.\`is_slot\`
     WHERE 
-        p.\`is_post\` = 0 OR p.\`is_post\` IS NULL
+        (p.\`is_post\` = 0 OR p.\`is_post\` IS NULL)
+        AND s.\`user_id\` = ${session.uniid} 
     ORDER BY 
         s.\`time\` ASC;
 `;
