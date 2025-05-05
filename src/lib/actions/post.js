@@ -208,64 +208,142 @@ async function Upload(image_path, linkedinId) {
     };
 }
 
-export async function getNextFreeSlot(user_id) {
-    try {
-        // STEP 1: Get today's day number (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-        const today = new Date();
-        const todayDay = today.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
+// export async function getNextFreeSlot(user_id) {
+//     try {
+//         // STEP 1: Get today's day number (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+//         const today = new Date();
+//         const todayDay = today.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
 
-        // STEP 2: Fetch the next available slot for the next few days (e.g., next 7 days)
-        const slots = await prisma.slots.findMany({
+//         // STEP 2: Fetch the next available slot for the next few days (e.g., next 7 days)
+//         const slots = await prisma.slots.findMany({
+//             where: {
+//                 user_id,
+//                 is_schedule: 0, // Unscheduled slots
+//                 day: {
+//                     // Include any day within the next 7 days
+//                     contains: String(todayDay), // Check if the slot's day includes today's day
+//                 },
+//             },
+//             orderBy: [
+//                 { time: 'asc' }, // Get the earliest available slot
+//             ],
+//         });
+
+//         if (!slots || slots.length === 0) {
+//             return {
+//                 status: false,
+//                 error: 'No available slots in the coming days.',
+//             };
+//         }
+
+//         // STEP 3: Iterate through the slots and return the first available slot in the next 7 days
+//         for (const slot of slots) {
+//             // Calculate the date for this slot
+//             const slotDay = parseInt(slot.day); // Convert slot day to integer (e.g., Monday = 1)
+//             const daysToAdd = (slotDay + 7 - todayDay) % 7 || 7; // Ensure it gets a day in the future
+//             const nextDate = new Date();
+//             nextDate.setDate(today.getDate() + daysToAdd); // Add calculated days to get the future date
+
+//             const formattedDate = nextDate.toISOString().split('T')[0]; // Format the date as YYYY-MM-DD
+
+//             return {
+//                 status: true,
+//                 data: {
+//                     time: slot.time,
+//                     date: formattedDate,
+//                 },
+//             };
+//         }
+
+//         // STEP 4: If no slots found in the coming days
+//         return {
+//             status: false,
+//             error: 'No available slot in the next 7 days.',
+//         };
+
+//     } catch (err) {
+//         console.error('Error fetching next free slot:', err);
+//         return {
+//             status: false,
+//             error: err.message,
+//         };
+//     }
+// }
+
+export async function getNextFreeSlot(user_id) {
+    const today = new Date();
+    const todayDay = today.getDay(); // Get today's day (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const currentTime = today.getHours() * 60 + today.getMinutes(); // Current time in minutes
+
+    // Function to get slots for a specific day
+    async function getSlotsForDay(day) {
+        return await prisma.slots.findMany({
             where: {
                 user_id,
-                is_schedule: 0, // Unscheduled slots
+                is_schedule: 0,
                 day: {
-                    // Include any day within the next 7 days
-                    contains: String(todayDay), // Check if the slot's day includes today's day
+                    contains: String(day), // Check if the slot's day includes this specific day
                 },
             },
             orderBy: [
-                { time: 'asc' }, // Get the earliest available slot
+                { time: 'asc' }, // Sort by time ascending
             ],
         });
+    }
 
-        if (!slots || slots.length === 0) {
-            return {
-                status: false,
-                error: 'No available slots in the coming days.',
-            };
+    async function getNextAvailableSlot() {
+        for (let i = 1; i <= 7; i++) { // Start from the next day
+            const day = (todayDay + i) % 7;
+            const slots = await getSlotsForDay(day);
+
+            // Filter slots where 'day' field includes this exact day (as a number in comma-separated string)
+            const dayMatchingSlots = slots.filter(slot => {
+                const daysArray = slot.day.split(',').map(d => parseInt(d.trim()));
+                return daysArray.includes(day);
+            });
+
+            if (dayMatchingSlots.length > 0) {
+                const nextSlot = dayMatchingSlots[0]; // First available time (already ordered)
+                const formattedDate = new Date();
+                formattedDate.setDate(formattedDate.getDate() + i); // i days from today
+
+                return {
+                    status: true,
+                    data: {
+                        time: nextSlot.time,
+                        date: formattedDate.toISOString().split('T')[0],
+                    }
+                };
+            }
         }
 
-        // STEP 3: Iterate through the slots and return the first available slot in the next 7 days
-        for (const slot of slots) {
-            // Calculate the date for this slot
-            const slotDay = parseInt(slot.day); // Convert slot day to integer (e.g., Monday = 1)
-            const daysToAdd = (slotDay + 7 - todayDay) % 7 || 7; // Ensure it gets a day in the future
-            const nextDate = new Date();
-            nextDate.setDate(today.getDate() + daysToAdd); // Add calculated days to get the future date
+        return { status: false, message: 'No available slots found.' };
+    }
 
-            const formattedDate = nextDate.toISOString().split('T')[0]; // Format the date as YYYY-MM-DD
 
-            return {
-                status: true,
-                data: {
-                    time: slot.time,
-                    date: formattedDate,
-                },
-            };
-        }
 
-        // STEP 4: If no slots found in the coming days
+    // Get today’s slots
+    const todaySlots = await getSlotsForDay(todayDay);
+
+    // Filter out the passed slots for today
+    const validTodaySlots = todaySlots.filter(slot => {
+        const [hours, minutes] = slot.time.split(':').map(Number);
+        const slotTime = hours * 60 + minutes;
+        return slotTime >= currentTime; // Keep only future slots
+    });
+
+    if (validTodaySlots.length > 0) {
+        // Return the first available slot for today
+        const nextSlot = validTodaySlots[0];
         return {
-            status: false,
-            error: 'No available slot in the next 7 days.',
+            status: true,
+            data: {
+                time: nextSlot.time,
+                date: today.toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+            },
         };
-
-    } catch (err) {
-        console.error('Error fetching next free slot:', err);
-        return {
-            status: false,
-            error: err.message,
-        };
+    } else {
+        // If all slots for today have passed, look for the next available day
+        return await getNextAvailableSlot();
     }
 }

@@ -684,7 +684,7 @@ export default function TextFormatterClient({ slot, freeSlot }) {
                 <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
                   <div className="p-2">
                     <p className="text-sm font-outerSans font-medium text-white mb-1">
-                      Add to Que {formatDate(new Date())} , {
+                      Add to Que {formatDate(freeSlot?.data?.date ?? new Date())} , {
                         slot[0]?.time
                           ? convertTo12Hour(slot[0]?.time)
                           : `${convertTo12Hour(freeSlot?.data?.time)}`

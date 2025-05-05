@@ -12,6 +12,7 @@ model users {
   uniid         String?  @db.VarChar(255)
   name          String?  @db.VarChar(255)
   email         String?  @db.VarChar(100)
+  timeZone      String?  @db.VarChar(255)
   profile_image String?  @db.VarChar(500)
   is_paid       Int      @default(0)
   is_trial      Int      @default(0)
