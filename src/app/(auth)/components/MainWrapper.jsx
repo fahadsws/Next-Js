@@ -20,9 +20,9 @@ export default async function MainWrapper({ slots: slot, session }) {
         s.*, 
         p.*
     FROM 
-        \`Slots\` s
+        \`slots\` s
     LEFT JOIN 
-        \`Posts\` p ON s.id = p.\`is_slot\`
+        \`posts\` p ON s.id = p.\`is_slot\`
     WHERE 
         p.\`is_post\` = 0 OR p.\`is_post\` IS NULL
     ORDER BY 
