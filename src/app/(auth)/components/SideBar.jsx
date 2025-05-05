@@ -5,7 +5,7 @@ import Posts from "./Posts";
 import Link from "next/link";
 import Draft from "./Draft";
 
-export default function SideBar({ slots, posts, user_id, draftPosts, notPosts }) {
+export default function SideBar({ slots, posts, user_id, draftPosts, notPosts,notPosted }) {
     const [tab, setTab] = useState(1);
     const truncateContent = (content, limit = 20) => {
         if (content.length <= limit) return content;
@@ -25,7 +25,7 @@ export default function SideBar({ slots, posts, user_id, draftPosts, notPosts })
                                 : 'text-gray-600 hover:text-blue-600'
                                 }`}
                         >
-                            {label} {label == 'Queue' && <span className="text-xs text-gray-400">({notPosts.length})</span>}
+                            {label} {label == 'Queue' && <span className="text-xs text-gray-400">({notPosted.length})</span>}
                         </button>
                     );
                 })}
