@@ -15,15 +15,25 @@ export default async function MainWrapper({ slots: slot, session }) {
 
     const notPosts = posts.filter(post => post.is_post === 0 && post.is_draft === 0);
 
-    const slotIds = [...new Set(notPosts.map(post => post.is_slot))];
-
-    const slots = await prisma.slots.findMany({
-        where: { id: { in: slotIds } },
+    const result = await prisma.$queryRaw`
+    SELECT 
+        s.*, 
+        p.*
+    FROM 
+        \`Slots\` s
+    LEFT JOIN 
+        \`Posts\` p ON s.id = p.\`is_slot\`
+    WHERE 
+        p.\`is_post\` = 0 OR p.\`is_post\` IS NULL
+    ORDER BY 
+        s.\`time\` ASC;
+`;
+    const notPostsWithSlots = result.map(slot => {
+        return {
+            ...slot,
+            post: slot.id ? { ...slot } : null,
+        };
     });
-    const notPostsWithSlots = notPosts.map(post => ({
-        ...post,
-        slot: slots.find(slot => slot.id === post.is_slot),
-    }));
     return (
         <>
             <div className="h-screen w-[360px] bg-white shadow-xl flex flex-col p-4">
@@ -43,7 +53,7 @@ export default async function MainWrapper({ slots: slot, session }) {
                     </div>
                 </Link>
                 <div className="overflow-y-auto">
-                    <SideBar slots={slot} user_id={session?.uniid} posts={posted} draftPosts={draftPosts} notPosts={notPostsWithSlots} />
+                    <SideBar slots={slot} user_id={session?.uniid} posts={posted} draftPosts={draftPosts} notPosts={notPostsWithSlots} notPosted={notPosts} />
                 </div>
             </div>
         </>
