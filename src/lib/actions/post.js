@@ -270,80 +270,181 @@ async function Upload(image_path, linkedinId) {
 //     }
 // }
 
+// export async function getNextFreeSlot(user_id) {
+//     const today = new Date();
+//     const todayDay = today.getDay(); // Get today's day (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+//     const currentTime = today.getHours() * 60 + today.getMinutes(); // Current time in minutes
+
+//     // Function to get slots for a specific day
+//     async function getSlotsForDay(day) {
+//         return await prisma.slots.findMany({
+//             where: {
+//                 user_id,
+//                 is_schedule: 0,
+//                 day: {
+//                     contains: String(day), // Check if the slot's day includes this specific day
+//                 },
+//             },
+//             orderBy: [
+//                 { time: 'asc' }, // Sort by time ascending
+//             ],
+//         });
+//     }
+
+//     async function getNextAvailableSlot() {
+//         for (let i = 1; i <= 7; i++) { // Start from the next day
+//             const day = (todayDay + i) % 7;
+//             const slots = await getSlotsForDay(day);
+
+//             // Filter slots where 'day' field includes this exact day (as a number in comma-separated string)
+//             const dayMatchingSlots = slots.filter(slot => {
+//                 const daysArray = slot.day.split(',').map(d => parseInt(d.trim()));
+//                 return daysArray.includes(day);
+//             });
+
+//             if (dayMatchingSlots.length > 0) {
+//                 const nextSlot = dayMatchingSlots[0]; // First available time (already ordered)
+//                 const formattedDate = new Date();
+//                 formattedDate.setDate(formattedDate.getDate() + i); // i days from today
+
+//                 return {
+//                     status: true,
+//                     data: {
+//                         time: nextSlot.time,
+//                         date: formattedDate.toISOString().split('T')[0],
+//                     }
+//                 };
+//             }
+//         }
+
+//         return { status: false, message: 'No available slots found.' };
+//     }
+
+
+
+//     // Get today’s slots
+//     const todaySlots = await getSlotsForDay(todayDay);
+
+//     // Filter out the passed slots for today
+//     const validTodaySlots = todaySlots.filter(slot => {
+//         const [hours, minutes] = slot.time.split(':').map(Number);
+//         const slotTime = hours * 60 + minutes;
+//         return slotTime >= currentTime; // Keep only future slots
+//     });
+
+//     if (validTodaySlots.length > 0) {
+//         // Return the first available slot for today
+//         const nextSlot = validTodaySlots[0];
+//         return {
+//             status: true,
+//             data: {
+//                 time: nextSlot.time,
+//                 date: today.toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+//             },
+//         };
+//     } else {
+//         // If all slots for today have passed, look for the next available day
+//         return await getNextAvailableSlot();
+//     }
+// }
+
 export async function getNextFreeSlot(user_id) {
     const today = new Date();
-    const todayDay = today.getDay(); // Get today's day (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-    const currentTime = today.getHours() * 60 + today.getMinutes(); // Current time in minutes
+    const todayDay = today.getDay();
+    const currentTime = today.getHours() * 60 + today.getMinutes();
 
-    // Function to get slots for a specific day
+    // Check if a post already scheduled this slot on this date
+    async function isSlotUsedInPost(slotId, date) {
+        const used = await prisma.posts.findFirst({
+            where: {
+                is_slot: slotId,
+            }
+        });
+        return !!used;
+    }
+
+    // Check if a slot already exists with the same time and exact date
+    async function doesSlotExistWithDate(time, date) {
+        const existing = await prisma.slots.findFirst({
+            where: {
+                user_id,
+                time: time,
+                date: date,
+            }
+        });
+        return !!existing;
+    }
+
     async function getSlotsForDay(day) {
         return await prisma.slots.findMany({
             where: {
                 user_id,
                 is_schedule: 0,
                 day: {
-                    contains: String(day), // Check if the slot's day includes this specific day
+                    contains: String(day),
                 },
             },
             orderBy: [
-                { time: 'asc' }, // Sort by time ascending
+                { time: 'asc' },
             ],
         });
     }
 
     async function getNextAvailableSlot() {
-        for (let i = 1; i <= 7; i++) { // Start from the next day
+        for (let i = 1; i <= 7; i++) {
             const day = (todayDay + i) % 7;
             const slots = await getSlotsForDay(day);
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + i);
+            const formattedDate = targetDate.toISOString().split('T')[0];
 
-            // Filter slots where 'day' field includes this exact day (as a number in comma-separated string)
             const dayMatchingSlots = slots.filter(slot => {
                 const daysArray = slot.day.split(',').map(d => parseInt(d.trim()));
                 return daysArray.includes(day);
             });
 
-            if (dayMatchingSlots.length > 0) {
-                const nextSlot = dayMatchingSlots[0]; // First available time (already ordered)
-                const formattedDate = new Date();
-                formattedDate.setDate(formattedDate.getDate() + i); // i days from today
+            for (const slot of dayMatchingSlots) {
+                const isUsedInPost = await isSlotUsedInPost(slot.id, formattedDate);
+                const existsWithDate = await doesSlotExistWithDate(slot.time, formattedDate);
 
-                return {
-                    status: true,
-                    data: {
-                        time: nextSlot.time,
-                        date: formattedDate.toISOString().split('T')[0],
-                    }
-                };
+                if (!isUsedInPost && !existsWithDate) {
+                    return {
+                        status: true,
+                        data: {
+                            time: slot.time,
+                            date: formattedDate,
+                        }
+                    };
+                }
             }
         }
 
         return { status: false, message: 'No available slots found.' };
     }
 
-
-
-    // Get today’s slots
     const todaySlots = await getSlotsForDay(todayDay);
+    const formattedToday = today.toISOString().split('T')[0];
 
-    // Filter out the passed slots for today
     const validTodaySlots = todaySlots.filter(slot => {
         const [hours, minutes] = slot.time.split(':').map(Number);
         const slotTime = hours * 60 + minutes;
-        return slotTime >= currentTime; // Keep only future slots
+        return slotTime >= currentTime;
     });
 
-    if (validTodaySlots.length > 0) {
-        // Return the first available slot for today
-        const nextSlot = validTodaySlots[0];
-        return {
-            status: true,
-            data: {
-                time: nextSlot.time,
-                date: today.toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
-            },
-        };
-    } else {
-        // If all slots for today have passed, look for the next available day
-        return await getNextAvailableSlot();
+    for (const slot of validTodaySlots) {
+        const isUsedInPost = await isSlotUsedInPost(slot.id, formattedToday);
+        const existsWithDate = await doesSlotExistWithDate(slot.time, formattedToday);
+
+        if (!isUsedInPost && !existsWithDate) {
+            return {
+                status: true,
+                data: {
+                    time: slot.time,
+                    date: formattedToday,
+                },
+            };
+        }
     }
+
+    return await getNextAvailableSlot();
 }

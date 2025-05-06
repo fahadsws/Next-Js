@@ -5,7 +5,7 @@ import Posts from "./Posts";
 import Link from "next/link";
 import Draft from "./Draft";
 
-export default function SideBar({ slots, posts, user_id, draftPosts, notPosts,notPosted }) {
+export default function SideBar({ slots, posts, user_id, draftPosts, notPosts, notPosted, notPost }) {
     const [tab, setTab] = useState(1);
     const truncateContent = (content, limit = 20) => {
         if (content.length <= limit) return content;
@@ -25,7 +25,7 @@ export default function SideBar({ slots, posts, user_id, draftPosts, notPosts,no
                                 : 'text-gray-600 hover:text-blue-600'
                                 }`}
                         >
-                            {label} {label == 'Queue' && <span className="text-xs text-gray-400">({notPosted.length})</span>}
+                            {label} {label == 'Queue' && <span className="text-xs text-gray-400">({notPost.filter((p) => p.is_slot != 0 && p.is_post == 0).length})</span>}
                         </button>
                     );
                 })}
@@ -36,7 +36,7 @@ export default function SideBar({ slots, posts, user_id, draftPosts, notPosts,no
             </Link>
 
             <div className="transition-opacity duration-300 ease-in-out opacity-100 animate-fadeIn">
-                {tab === 1 && <Slots slots={slots} user_id={user_id} notPosts={notPosts} truncateContent={truncateContent} />}
+                {tab === 1 && <Slots notPost={notPost} slots={slots} user_id={user_id} notPosts={notPosts} truncateContent={truncateContent} />}
                 {tab === 2 && <Draft posts={draftPosts} truncateContent={truncateContent} />}
                 {tab === 3 && <Posts posts={posts} truncateContent={truncateContent} />}
             </div>

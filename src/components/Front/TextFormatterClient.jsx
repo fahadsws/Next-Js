@@ -414,12 +414,21 @@ export default function TextFormatterClient({ slot, freeSlot }) {
 
     setPostLoading('slot');
 
+    // const payload = {
+    //   content: data,
+    //   is_slot: slot[0]?.id,
+    //   image: image ?? null,
+    //   id: id,
+    // };
     const payload = {
       content: data,
-      is_slot: slot[0]?.id,
+      time: freeSlot?.data?.time,
+      date: freeSlot?.data?.date,
+      is_schedule: true,
       image: image ?? null,
       id: id,
     };
+
 
     try {
       const response = await createPostAction(payload, session?.accessToken);
@@ -685,9 +694,9 @@ export default function TextFormatterClient({ slot, freeSlot }) {
                   <div className="p-2">
                     <p className="text-sm font-outerSans font-medium text-white mb-1">
                       Add to Que {formatDate(freeSlot?.data?.date ?? new Date())} , {
-                        slot[0]?.time
-                          ? convertTo12Hour(slot[0]?.time)
-                          : `${convertTo12Hour(freeSlot?.data?.time)}`
+                        freeSlot?.data?.time
+                          ? `${convertTo12Hour(freeSlot?.data?.time)}`
+                          : convertTo12Hour(slot[0]?.time)
                       }
                       {postLoading == 'slot' ? "⏳" : ''}
                     </p>

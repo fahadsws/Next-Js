@@ -54,7 +54,7 @@ export default async function MainWrapper({ slots: slot, session }) {
                     </div>
                 </Link>
                 <div className="overflow-y-auto">
-                    <SideBar slots={slot} user_id={session?.uniid} posts={posted} draftPosts={draftPosts} notPosts={notPostsWithSlots} notPosted={notPosts} />
+                    <SideBar notPost={notPosts} slots={slot} user_id={session?.uniid} posts={posted} draftPosts={draftPosts} notPosts={notPostsWithSlots} notPosted={notPosts} />
                 </div>
             </div>
         </>
