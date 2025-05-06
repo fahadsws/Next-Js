@@ -7,7 +7,7 @@ import DeleteModel from "./DeleteModel";
 import Posts from "./Posts";
 import { convertTo12Hour } from "@/lib/api/user";
 
-export default function Slots({ slots, notPosts, truncateContent }) {
+export default function Slots({ slots, notPosts, truncateContent, notPost }) {
     const { date: storedate, slottime, setDraftPost } = draftPost();
     const [isOpen, setIsOpen] = useState(false);
     const [deleteModel, setDeleteModel] = useState(false);
@@ -56,8 +56,8 @@ export default function Slots({ slots, notPosts, truncateContent }) {
                 </button>
             </div>
 
-            {notPosts.filter((p) => p.is_slot == 0) && notPosts.length > 0 ? (
-                <Posts posts={notPosts.filter((p) => p.is_slot == 0)} truncateContent={truncateContent} />
+            {notPost.filter((p) => p.is_slot == 0) && notPost.length > 0 ? (
+                <Posts posts={notPost.filter((p) => p.is_slot == 0)} truncateContent={truncateContent} />
             ) : (
                 <p className="text-sm my-3 bg-red-300 text-black p-3 rounded-lg text-center font-medium">You have no posts scheduled.</p>
             )}
@@ -169,18 +169,26 @@ export default function Slots({ slots, notPosts, truncateContent }) {
             </div> */}
             <div className="space-y-6 overflow-y-auto flex-1 pr-2">
                 {getNext10Days().map((date) => {
-                    const dayIndex = date.getDay();
+                    const dayIndex = date.getDay(); // Get the day index (0-6)
                     const currentDate = new Date();
                     const currentTime = currentDate.getTime();
+                    const compareDate = date.toISOString().split('T')[0]; // Current date in ISO format (YYYY-MM-DD)
 
                     // Filter out the slots for the given day
                     const daySlots = notPosts.filter((slot) => isSlotAvailable(slot, dayIndex));
 
                     // Filter out the slots that are in the past (today's slots)
                     const futureDaySlots = daySlots.filter((slot) => {
-                        const slotDateStr = slot?.date ?? date.toISOString().split('T')[0];
+                        const slotDateStr = slot?.date ?? compareDate; // Default to current date if slot's date is null
                         const slotDateTime = new Date(`${slotDateStr}T${slot.time}:00`).getTime();
-                        return slotDateTime > currentTime || slotDateStr !== currentDate.toISOString().split('T')[0];
+
+                        // If the slot has a specific date, ensure it is shown only for that date
+                        if (slot?.date) {
+                            return slotDateStr === compareDate && slotDateTime > currentTime;
+                        }
+
+                        // If the slot doesn't have a specific date, check if it should be shown on this day
+                        return slotDateTime > currentTime;
                     });
 
                     // If there are no available future slots for this day, skip rendering the day
@@ -188,14 +196,17 @@ export default function Slots({ slots, notPosts, truncateContent }) {
                         return null;
                     }
 
+
+                    // Create a Set of occupied slots (to handle duplicates)
                     const occupiedSlots = new Set(
                         notPosts
-                            .filter(slot => slot.id !== null && slot.date)
-                            .map(slot => `${slot.date}-${slot.time}`)
+                            .filter((slot) => slot.id !== null && slot.date)
+                            .map((slot) => `${slot.date}-${slot.time}`)
                     );
 
                     return (
                         <div key={date}>
+                            {/* Render the day and date only if there are available slots */}
                             <p className="text-sm mb-2 font-mono text-black">
                                 {getDayName(date)}{" "}
                                 <span className="text-black">{getFormattedDate(date)}</span>
@@ -203,7 +214,7 @@ export default function Slots({ slots, notPosts, truncateContent }) {
 
                             {/* Render the future slots for this day */}
                             {futureDaySlots.map((slot) => {
-                                const slotDateStr = slot?.date ?? date.toISOString().split('T')[0];
+                                const slotDateStr = slot?.date ?? compareDate; // Use the slot's date or today's date
                                 const isDuplicate = slot.id === null && occupiedSlots.has(`${slotDateStr}-${slot.time}`);
                                 if (isDuplicate) return null;
 
@@ -212,7 +223,8 @@ export default function Slots({ slots, notPosts, truncateContent }) {
                                     return null;
                                 }
 
-                                if (slot?.date === date.toISOString().split('T')[0]) {
+                                // Render the post if there's a valid slot
+                                if (slot?.date === compareDate) {
                                     if (slot?.id) {
                                         return (
                                             <div
@@ -258,6 +270,7 @@ export default function Slots({ slots, notPosts, truncateContent }) {
                                     }
                                 }
 
+                                // Render a 'new draft' slot if it's the current date and time
                                 if (date.toDateString() === new Date(storedate).toDateString() && slottime === slot?.time) {
                                     return (
                                         <div
@@ -273,7 +286,8 @@ export default function Slots({ slots, notPosts, truncateContent }) {
                                     );
                                 }
 
-                                if (!slot?.id && slot?.date == null) {
+                                // Render available time slots if no post is associated with them
+                                if (slot?.is_schedule === 0 && slot?.date === null) {
                                     return (
                                         <div
                                             key={`${Math.random()}`}
