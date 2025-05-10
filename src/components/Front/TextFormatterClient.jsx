@@ -21,6 +21,7 @@ import PostModal from './PostModel';
 import { draftPost } from '@/store/useStores';
 import { createPostAction, createSlot } from '@/lib/actions/post';
 import UnscheduleModel from '@/app/(auth)/components/UnscheduleModel';
+import AiPromot from './AiPromot';
 
 const CustomButton = ({ icon: Icon, onClick, title, isActive }) => (
   <button
@@ -488,33 +489,103 @@ export default function TextFormatterClient({ slot, freeSlot }) {
   };
 
 
-  const runApiAndUpdateEditor = (type) => {
-    const content = editor.getText();
 
-    if (!content || content === '<p></p>') {
-      toast.error('Post is empty!');
-      return;
-    }
-
-    setLoading(true);
-    setActiveAction(type)
-    const payload = {
-      inputText: content,
-      type: type,
-    };
-
-    createPost('users/AI-assist-V1', payload, session?.accessToken)
-      .then((response) => {
-        const newContent = response?.data || '';
-        editor.commands.setContent(newContent);
-        setLoading(false);
-        toast.success(response?.message);
-      })
-      .catch((err) => {
-        console.log(err)
-        toast.error('Failed to create post');
-      });
+  const instructionMap = {
+    continue: 'Continue writing this LinkedIn post.',
+    improve: 'Improve the quality and writing of this LinkedIn post.',
+    grammar: 'Fix grammar and typos in this LinkedIn post.',
+    shorter: 'Make the LinkedIn post shorter but still impactful.',
+    longer: 'Expand on the ideas and make the LinkedIn post longer.',
+    positive: 'Rewrite the LinkedIn post with a more optimistic tone.',
+    simplify: 'Simplify the language for broader understanding for LinkedIn post.',
+    hook: 'Add a strong attention-grabbing hook at the beginning for LinkedIn post.',
+    cta: 'Add a strong CTA at the end for LinkedIn post.',
+    emoji: 'Add emojis to make it more expressive for LinkedIn post.',
+    examples: 'Add specific examples to support the message for LinkedIn post.',
   };
+  
+  // const streamAIResponse = async ({ inputText, type, onChunk }) => {
+  //   const instruction = instructionMap[type] || 'Write a professional and engaging LinkedIn post based on the following idea or text.';
+  
+  //   const res = await fetch('https://api.together.xyz/v1/chat/completions', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization: `Bearer ${process.env.NEXT_PUBLIC_AI_MODEL_KEY}`,
+  //     },
+  //     body: JSON.stringify({
+  //       model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+  //       stream: true,
+  //       temperature: 0.7,
+  //       max_tokens: type === 'longer' ? 800 : 300,
+  //       messages: [
+  //         { role: 'system', content: instruction },
+  //         { role: 'user', content: inputText },
+  //       ],
+  //     }),
+  //   });
+  
+  //   const reader = res.body.getReader();
+  //   const decoder = new TextDecoder();
+  //   let result = '';
+  
+  //   for await (const chunk of streamIterator(reader, decoder)) {
+  //     if (chunk === '[DONE]') break;
+  
+  //     try {
+  //       const parsed = JSON.parse(chunk);
+  //       const content = parsed?.choices?.[0]?.delta?.content;
+  //       if (content) {
+  //         result += content;
+  //         onChunk(content);
+  //       }
+  //     } catch (err) {
+  //       console.error('Error parsing chunk:', err);
+  //     }
+  //   }
+  
+  //   return result;
+  // };
+  
+  // async function* streamIterator(reader, decoder) {
+  //   let buffer = '';
+  //   while (true) {
+  //     const { done, value } = await reader.read();
+  //     if (done) break;
+  //     buffer += decoder.decode(value, { stream: true });
+  //     const lines = buffer.split('\n');
+  //     for (const line of lines) {
+  //       if (line.startsWith('data:')) yield line.replace(/^data:\s*/, '').trim();
+  //     }
+  //     buffer = '';
+  //   }
+  // }
+  
+  // const runApiAndUpdateEditor = (type) => {
+  //   const content = editor.getText();
+  //   if (!content || content === '<p></p>') return toast.error('Post is empty!');
+  
+  //   setLoading(true);
+  //   setActiveAction(type);
+  
+  //   let streamedText = '';
+  //   streamAIResponse({
+  //     inputText: content,
+  //     type,
+  //     onChunk: (chunk) => {
+  //       streamedText += chunk;
+  //       editor.commands.setContent(streamedText);
+  //     },
+  //   })
+  //     .then(() => toast.success('AI post completed!'))
+  //     .catch((err) => {
+  //       console.error(err);
+  //       toast.error('AI generation failed');
+  //     })
+  //     .finally(() => setLoading(false));
+  // };
+  
+
 
   const handlSchedulePostModel = () => {
     if (!editor.getText()) {
@@ -652,12 +723,11 @@ export default function TextFormatterClient({ slot, freeSlot }) {
             accept="image/*,.pdf"
           />
         </div>
-
         <RichTextEditor editor={editor}>
           <RichTextEditor.Content />
         </RichTextEditor>
-
-        <div className="py-6">
+        <AiPromot editor={editor} />
+        {/* <div className="py-6">
           <div className="flex flex-wrap gap-4 justify-start">
             {[
               { label: 'Continue writing', action: 'continue' },
@@ -683,75 +753,97 @@ export default function TextFormatterClient({ slot, freeSlot }) {
               </button>
             ))}
           </div>
-        </div>
-
+        </div> */}
+        <div style={{ position: 'fixed', bottom: 50, left: '50%', transform: 'translateX(-50%)', zIndex: 50 }}>
         {!slottime ? (
-          <div className="editor-footer flex mt-10">
-            {(slot[0]?.time || freeSlot?.status) && (
-              <button onClick={handlSlotPost} className="relative block group mx-3">
-                <span className="absolute inset-0 bg-green-500 rounded-lg transition-all duration-300 group-hover:bg-green-600"></span>
-                <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
-                  <div className="p-2">
-                    <p className="text-sm font-outerSans font-medium text-white mb-1">
-                      Add to Que {formatDate(freeSlot?.data?.date ?? new Date())} , {
-                        freeSlot?.data?.time
-                          ? `${convertTo12Hour(freeSlot?.data?.time)}`
-                          : convertTo12Hour(slot[0]?.time)
-                      }
-                      {postLoading == 'slot' ? "⏳" : ''}
+          // <div className="editor-footer flex mt-2">
+          //   {(slot[0]?.time || freeSlot?.status) && (
+          //     <button onClick={handlSlotPost} className="relative block group mx-3">
+          //       <span className="absolute inset-0 bg-green-500 rounded-lg transition-all duration-300 group-hover:bg-green-600"></span>
+          //       <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
+          //         <div className="p-2">
+          //           <p className="text-sm font-outerSans font-medium text-white mb-1">
+          //             Add to Que {formatDate(freeSlot?.data?.date ?? new Date())} , {
+          //               freeSlot?.data?.time
+          //                 ? `${convertTo12Hour(freeSlot?.data?.time)}`
+          //                 : convertTo12Hour(slot[0]?.time)
+          //             }
+          //             {postLoading == 'slot' ? "⏳" : ''}
+          //           </p>
+          //         </div>
+          //       </div>
+          //     </button>
+          //   )}
+          //   <button onClick={handlSchedulePostModel} className="relative block group mx-3">
+          //     <span className="absolute inset-0 bg-amber-400 rounded-lg transition-all duration-300 group-hover:bg-amber-500"></span>
+          //     <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
+          //       <div className="p-2">
+          //         <p className="text-sm font-outerSans font-medium text-white mb-1">
+          //           Schedule {postLoading == 'schedule' ? "⏳" : ''}
+          //         </p>
+          //       </div>
+          //     </div>
+          //   </button>
+
+          //   <button onClick={handlePostNow} className="relative block group mx-3">
+          //     <span className="absolute inset-0 bg-indigo-500 rounded-lg transition-all duration-300 group-hover:bg-indigo-600"></span>
+          //     <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
+          //       <div className="p-2">
+          //         <p className="text-sm font-outerSans font-medium text-white mb-1">
+          //           Post now {postLoading == 'post' ? "⏳" : ''}
+          //         </p>
+          //       </div>
+          //     </div>
+          //   </button>
+          // </div>
+          <div className="flex items-center justify-center mt-4">
+            <div className="bg-white rounded-full shadow-lg px-5 py-5 flex items-center space-x-2">
+              <button
+                onClick={handlSchedulePostModel}
+                className="bg-[#f60] hover:bg-[#e65c00] text-white text-sm font-semibold rounded-lg px-5 py-2"
+              >
+                Schedule {postLoading === 'schedule' ? "⏳" : ""}
+              </button>
+
+              {(slot[0]?.time || freeSlot?.status) && (
+                <button
+                  onClick={handlSlotPost}
+                  className="bg-[#1DA1F2] hover:bg-[#1a91da] text-white rounded-full px-5 py-2 text-left"
+                >
+                  <div className="leading-4 text-center">
+                    <p className="text-[15px] font-semibold">Add to Queue</p>
+                    <p className="text-[10px]">
+                      {formatDate(freeSlot?.data?.date ?? new Date())},{" "}
+                      {freeSlot?.data?.time
+                        ? `${convertTo12Hour(freeSlot?.data?.time)}`
+                        : convertTo12Hour(slot[0]?.time)}
+                      {postLoading === 'slot' ? " ⏳" : ""}
                     </p>
                   </div>
-                </div>
-              </button>
-            )}
-            <button onClick={handlSchedulePostModel} className="relative block group mx-3">
-              <span className="absolute inset-0 bg-amber-400 rounded-lg transition-all duration-300 group-hover:bg-amber-500"></span>
-              <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
-                <div className="p-2">
-                  <p className="text-sm font-outerSans font-medium text-white mb-1">
-                    Schedule {postLoading == 'schedule' ? "⏳" : ''}
-                  </p>
-                </div>
-              </div>
-            </button>
+                </button>
+              )}
 
-            <button onClick={handlePostNow} className="relative block group mx-3">
-              <span className="absolute inset-0 bg-indigo-500 rounded-lg transition-all duration-300 group-hover:bg-indigo-600"></span>
-              <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
-                <div className="p-2">
-                  <p className="text-sm font-outerSans font-medium text-white mb-1">
-                    Post now {postLoading == 'post' ? "⏳" : ''}
-                  </p>
-                </div>
-              </div>
-            </button>
+              <button
+                onClick={handlePostNow}
+                className="bg-white hover:bg-gray-100 border border-gray-300 text-black text-sm font-semibold rounded-lg px-5 py-2"
+              >
+                Post now {postLoading === 'post' ? "⏳" : ""}
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="flex mt-5">
-            <button onClick={handlSchedulePostModel} className="relative block group mx-3">
-              <span className="absolute inset-0 bg-green-500 rounded-lg transition-all duration-300 group-hover:bg-green-600"></span>
-              <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
-                <div className="p-2">
-                  <p className="text-sm font-outerSans font-medium text-white mb-1">
+          <div className="flex items-center justify-center mt-4">
+            <div className="bg-white rounded-full shadow-lg px-5 py-5 flex items-center space-x-5">
+            <button onClick={handlSchedulePostModel} className="bg-[#f60] hover:bg-[#e65c00] text-white text-sm font-semibold rounded-lg px-5 py-2">
                     {slottime && `${formatDate(date)} , ${convertTo12Hour(slottime)}`} {postLoading == 'schedule' ? "⏳" : ''}
-                  </p>
-                </div>
-              </div>
             </button>
-            <button onClick={() => setUnscheduleModel(true)} className="relative block group mx-3">
-              <span className="absolute inset-0 bg-green-500 rounded-lg transition-all duration-300 group-hover:bg-green-600"></span>
-              <div className="px-4 transition bg-black relative border-2 rounded-lg -translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0">
-                <div className="p-2">
-                  <p className="text-sm font-outerSans font-medium text-white mb-1">
-                    Unschedule?
-                  </p>
-                </div>
-              </div>
+            <button onClick={() => setUnscheduleModel(true)} className="bg-white hover:bg-gray-100 border border-gray-300 text-black text-sm font-semibold rounded-lg px-5 py-2">
+                    Unschedule ?
             </button>
+            </div>
           </div>
         )}
-
-
+        </div>
       </div>
       <div className="my-20">
         {editor && <PostBox image={image} content={editor.getText() ? editor.getHTML() : null} />}
