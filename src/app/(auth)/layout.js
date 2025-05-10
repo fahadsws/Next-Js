@@ -13,12 +13,12 @@ export default async function DashboardLayout({ children }) {
   });
   return (
     <>
-      <main className="flex">
-        <MainWrapper slots={slots} session={session} />
-        <div className="textformater w-[100%]">
-          {children}
-        </div>
-      </main>
+     <main className="flex w-full overflow-x-hidden h-screen">
+      <MainWrapper slots={slots} session={session} />
+      <div className="textformater w-full overflow-y-auto">
+        {children}
+      </div>
+    </main>
     </>
   );
 }
